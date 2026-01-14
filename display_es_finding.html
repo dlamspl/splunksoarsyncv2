@@ -1,0 +1,3058 @@
+{% extends 'widgets/widget_template.html' %}
+{% load custom_template %}
+
+{% block custom_title_prop %}
+{% if title_logo %}
+style="background-size: auto; background-position: auto; background-repeat: no-repeat; background-image: url('/app_resource/{{ title_logo }}');"
+{% endif %}
+{% endblock %}
+{% block title1 %}{{ title1 }}{% endblock %}
+{% block title2 %}{{ title2 }}{% endblock %}
+{% block custom_tools %}{% endblock %}
+
+{% block widget_content %}
+<style>
+/* Accordion Button */
+.accordion-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 5px;
+}
+.accordion-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Badge */
+.badge {
+    background-color: #6c757d;
+    color: #ffffff;
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+/* Big Badge */
+.bigbadge {
+    background-color: #6c757d;
+    color: #ffffff;
+    padding: 6px 8px;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-left: 5px;
+}
+
+/* Accordion Content */
+.accordion-content {
+    display: none;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+.accordion-content.active {
+    display: block;
+}
+
+/* Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1c2526;
+    color: #ffffff;
+}
+.table th, .table td {
+    padding: 8px;
+    border: 1px solid #444;
+}
+.table th {
+    background-color: #2c3e50;
+}
+.table tr:nth-child(even) {
+    background-color: #2a2d2e;
+}
+.table thead input.search-input {
+    width: 100%;
+    padding: 5px;
+    font-size: 0.9rem;
+}
+th.asc::after {
+    content: ' 🔼';
+}
+th.desc::after {
+    content: ' 🔽';
+}
+
+/* Search Input */
+.search-input {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+/* Grid Layout */
+.container {
+    padding: 10px;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.col {
+    flex: 1;
+    padding: 5px;
+    min-width: 200px;
+}
+
+/* Card and Code */
+.card {
+    background-color: #000000;
+    padding: 10px;
+    border-radius: 4px;
+}
+.card code {
+    color: #D3D3D3;
+    background-color: #000000;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+.btn-secondary {
+    background-color: #cccccc;
+    color: #666666;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    /* font-style: italic; */
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #d39e00;
+    text-decoration: none;
+    margin-right: 5px;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+/* Headers */
+h5 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+h6 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+.text-muted {
+    color: #6c757d;
+}
+.header-red {
+    color: red;
+}
+
+/* Divider */
+hr {
+    border: 2px solid red;
+    opacity: 0.5;
+    margin: 1px 0;
+}
+
+/* Artifacts Heading */
+.artifacts-heading {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Dummy Row */
+.dummy-row {
+    height: 0;
+    padding: 0;
+    margin: 0;
+}
+.dummy-row td {
+    visibility: hidden;
+    height: 0;
+    padding: 0;
+    border: none !important;
+}
+
+/* IOC Tabs */
+.tab-container {
+    height: 380px; /* Fixed height to prevent jitter */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.tab-nav {
+    list-style: none;
+    display: flex;
+    border-bottom: 2px solid #444;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.tab-nav li {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-bottom: none;
+    margin-right: 2px;
+    border-radius: 4px 4px 0 0;
+}
+
+.tab-nav li.active {
+    background: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+    min-height: 200px;
+    max-height: 100%;
+}
+
+/* Optional Scrollbar Styling */
+.tab-panel.active::-webkit-scrollbar {
+    width: 6px;
+}
+.tab-panel.active::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+.tab-panel.active::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* experimental copy button */
+.copy-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    margin-left: 1px;
+    font-size: 1em;
+}
+.copy-btn:hover {
+    color: green;
+}
+
+.related-records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.related-records-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+</style>
+
+
+<script>
+// Toggle accordion content visibility
+function toggleAccordion(id, button) {
+    const content = document.getElementById(id);
+    const isActive = content.classList.contains('active');
+    content.classList.toggle('active', !isActive);
+    // Update button indicator
+    const indicator = button.querySelector('.indicator');
+    indicator.textContent = isActive ? '▶' : '▼';
+}
+
+// function for filtering table rows based on multiple input fields
+function filterTable(inputIds, tableId) {
+    if (!Array.isArray(inputIds)) {
+        inputIds = [inputIds];
+    }
+    const table = document.getElementById(tableId);
+    if (!table || table.offsetParent === null) return;
+
+    const tbody = table.querySelector('tbody');
+    const rows = tbody.getElementsByTagName('tr');
+    const filters = inputIds.map(id => {
+        const input = document.getElementById(id);
+        return input ? input.value.toLowerCase() : '';
+    });
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let match = true;
+
+        for (let j = 0; j < filters.length; j++) {
+            const cellText = cells[j]?.textContent.toLowerCase() || '';
+            if (filters[j] && !cellText.includes(filters[j])) {
+                match = false;
+                break;
+            }
+        }
+
+        row.style.display = match ? '' : 'none';
+    }
+}
+
+// function for sorting table rows by column
+function sortTableByColumn(tableId, columnIndex, asc = true) {
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const dirModifier = asc ? 1 : -1;
+    const sortedRows = rows.sort((a, b) => {
+        const aText = a.cells[columnIndex]?.textContent.trim().toLowerCase() || '';
+        const bText = b.cells[columnIndex]?.textContent.trim().toLowerCase() || '';
+        return aText.localeCompare(bText) * dirModifier;
+    });
+
+    // Remove and re-add sorted rows
+    tbody.innerHTML = '';
+    sortedRows.forEach(row => tbody.appendChild(row));
+
+    // Toggle direction
+    const th = table.querySelectorAll('th')[columnIndex];
+    const currentAsc = th.classList.contains('asc');
+    table.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+    th.classList.toggle('asc', !currentAsc);
+    th.classList.toggle('desc', currentAsc);
+    th.setAttribute('onclick', `sortTableByColumn('${tableId}', ${columnIndex}, ${currentAsc ? 'true' : 'false'})`);
+}
+
+// Download IOCs (CSV)
+function downloadIOCsCSV() {
+    const tables = [
+        { idPrefix: "ipTable", type: "IP" },
+        { idPrefix: "domainTable", type: "Domain" },
+        { idPrefix: "urlTable", type: "URL" },
+        { idPrefix: "userTable", type: "User" },
+        { idPrefix: "hashTable", type: "Hash" },
+        { idPrefix: "emailTable", type: "Email" },
+        { idPrefix: "macTable", type: "MAC" }
+    ];
+
+    const rows = [["IOC", "Type"]]; // CSV headers
+
+    tables.forEach(({ idPrefix, type }) => {
+        const allTables = document.querySelectorAll(`table[id^='${idPrefix}']`);
+        allTables.forEach(table => {
+            const tbody = table.querySelector("tbody");
+            if (!tbody) return;
+
+            for (const row of tbody.rows) {
+                if (row.style.display === "none") continue; // Skip filtered-out rows
+                const iocCell = row.cells[0];
+                if (!iocCell) continue;
+                const ioc = iocCell.textContent.replace(/▼\s*$/, "").trim(); // Remove any sort indicator
+                if (ioc) rows.push([ioc, type]);
+            }
+        });
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," +
+        rows.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+
+    const downloadLink = document.createElement("a");
+    downloadLink.setAttribute("href", encodeURI(csvContent));
+    downloadLink.setAttribute("download", `${containerId}_unique_iocs.csv`);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+
+// Function to get CSRF token from cookies
+function getCsrfToken() {
+  const name = "csrftoken=";
+  const decodedCookies = decodeURIComponent(document.cookie);
+//   console.log("Decoded cookies:", decodedCookies);
+  const cookies = decodedCookies.split(';');
+  for (let c of cookies) {
+    c = c.trim();
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+// Function to get formatted timestamp for comments
+function getFormattedTimestamp() {
+    const now = new Date();
+    // const datetime = now.toISOString()
+    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const time = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    return `${date}, ${time}`;
+    // return `${datetime}`; // ISO format with date and time
+}
+
+// final function to refresh findings with cooldown logic and optional debug comment
+function refreshFindings(button, containerId, cooldownSeconds = 10, addDebugComment = false) {
+    if (!containerId) {
+        alert("No container ID provided.");
+        return;
+    }
+
+    // Check if user is blocked from running actions in SOAR UI
+    const builtInActionBtn = document.querySelector('[data-testid="container-run-action"]');
+    if (builtInActionBtn?.disabled) {
+        console.warn("User does not have permission to run actions. Refresh Findings disabled.");
+        button.disabled = true;
+        button.innerHTML = "🚫 No Permission";
+        return;
+    }
+
+    const originalHTML = button.innerHTML;
+    const now = Date.now();
+    const cooldownKey = `refreshCooldown_${containerId}_${window.location.pathname}`;
+    const lastCooldown = parseInt(sessionStorage.getItem(cooldownKey), 10) || 0;
+
+    if (now < lastCooldown) {
+        console.warn("Cooldown active for container:", containerId);
+        button.disabled = true;
+        button.innerHTML = `⏳ Cooldown Active...`;
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+        }, lastCooldown - now);
+        return;
+    }
+
+    button.disabled = true;
+    button.innerHTML = `<span class="spinner" style="margin-right: 5px;">⏳</span>Refreshing...`;
+
+    // adds outer single quotes and escapes inner ones    
+    const safeAction = `'${"summarize finding".replace(/'/g, "\\'")}'`; 
+
+    fetch(`/rest/action_run?_filter_container_id=${containerId}&_filter_action=${safeAction}&page_size=1&page=0&sort=id&order=desc`, {
+        credentials: "same-origin"
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`Failed to fetch action runs: ${res.status}`);
+        return res.json();
+    })
+    .then(actionRuns => {
+        if (!actionRuns.data?.length) throw new Error("No previous summarize finding action_run found.");
+        const previousRunMeta = actionRuns.data[0];
+        return fetch(`/rest/action_run/${previousRunMeta.id}`, { credentials: "same-origin" });
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`Failed to fetch action run detail: ${res.status}`);
+        return res.json();
+    })
+    .then(previousRunDetail => {
+        const prevTarget = previousRunDetail.targets?.[0];
+        const originalParamBlock = prevTarget?.parameters?.[0];
+        const appId = prevTarget?.app_id;
+        const assets = Array.isArray(prevTarget?.assets) ? prevTarget.assets.map(a => parseInt(a, 10)).filter(n => !isNaN(n)) : [];
+
+        if (!originalParamBlock || !appId || !assets.length) {
+            throw new Error("Previous action_run is missing required target fields (app_id, assets, or parameters).");
+        }
+
+        const sanitizedParamBlock = {
+            ...originalParamBlock,
+            container_id: String(containerId)
+        };
+
+        const actionRequest = {
+            action: "summarize finding",
+            container_id: containerId,
+            targets: [
+                {
+                    app_id: appId,
+                    assets: assets,
+                    parameters: [sanitizedParamBlock]
+                }
+            ],
+            name: "Refresh Findings from Widget",
+            run_automation: false
+        };
+
+        return fetch("/rest/action_run", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+                "x-csrftoken": getCsrfToken()
+            },
+            credentials: "include",
+            mode: "same-origin",
+            body: JSON.stringify(actionRequest)
+        });
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`Failed to create new action_run: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        const runId = data?.action_run_id;
+        if (!runId) throw new Error("No action_run_id returned.");
+
+        const nextAllowed = Date.now() + cooldownSeconds * 1000;
+        sessionStorage.setItem(cooldownKey, nextAllowed.toString());
+
+        // Optional debug comment logging
+        if (addDebugComment) {
+            fetch(`/rest/action_run/${runId}?pretty`, { credentials: "same-origin" })
+                .then(res => res.ok ? res.json() : null)
+                .then(runDetail => {
+                    if (!runDetail) return;
+
+                    const comment = {
+                        container_id: containerId,
+                        comment:
+                            `🔁 Refresh Findings triggered via widget.\n` +
+                            `🆔 Action Run ID: ${runId}\n` +
+                            `🧑 User ID: ${runDetail._pretty_creator ?? "unknown"}\n` +
+                            `🌐 User IP: ${runDetail.ip_address ?? "unknown"}\n` +
+                            // `👤 Owner ID: ${runDetail._pretty_owner ?? "unknown"}\n` +
+                            `📡 SOAR Node GUID: ${runDetail.node_guid ?? "unknown"}\n` +
+                            // `🕒 Time: ${new Date().toLocaleString()}`
+                            `🕒 Time: ${getFormattedTimestamp()}`
+                    };
+
+                    return fetch("/rest/container_comment", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json, text/plain, */*",
+                            "x-csrftoken": getCsrfToken()
+                        },
+                        credentials: "include",
+                        mode: "same-origin",
+                        body: JSON.stringify(comment)
+                    });
+                })
+                .catch(err => {
+                    console.warn("⚠️ Failed to add debug comment:", err);
+                });
+        }
+
+        button.innerHTML = "✅ Done";
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+        }, cooldownSeconds * 1000);
+    })
+    .catch(err => {
+        console.error("Refresh action failed:", err);
+        button.innerHTML = "🚫 Error";
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+        }, 3000);
+    });
+}
+
+// Function to export IOC fields as CSV from artifacts
+async function exportIOCFields(containerId) {
+    // alert("Container ID " + containerId );
+    const showError = msg => {
+        console.error(msg);
+        alert(msg);
+    };
+
+    try {
+        // get latest summarize finding action_run
+        const actionRunRes = await fetch(
+            `/rest/action_run?container_id=${containerId}&action=summarize finding&page_size=1&page=0&sort=create_time&order=desc`,
+            { credentials: "same-origin" }
+        );
+        if (!actionRunRes.ok) throw new Error("Failed to fetch latest summarize finding run.");
+        const runData = await actionRunRes.json();
+        const latestRunId = runData?.data?.[0]?.id;
+        if (!latestRunId) return showError("No summarize finding action_run found.");
+
+        // fetch full action_run detail
+        const detailRes = await fetch(`/rest/action_run/${latestRunId}`, {
+            credentials: "same-origin"
+        });
+        if (!detailRes.ok) throw new Error("Failed to fetch action_run details.");
+        const runDetail = await detailRes.json();
+        const paramBlock = runDetail?.targets?.[0]?.parameters?.[0];
+        if (!paramBlock) return showError("No parameters found in summarize finding action.");
+
+        // parse *_fields into field map
+        const fieldMap = {}; // cefField -> iocType
+        Object.entries(paramBlock).forEach(([key, value]) => {
+            if (!key.endsWith("_fields")) return;
+            const iocType = key.replace("_fields", "").toLowerCase();
+            value.split(",").map(f => f.trim()).forEach(field => {
+                if (field) fieldMap[field] = iocType;
+            });
+        });
+
+        if (Object.keys(fieldMap).length === 0) {
+            return showError("No *_fields definitions found in action parameters.");
+        }
+
+        // get container artifacts
+        const artifactsRes = await fetch(`/rest/container/${containerId}/artifacts?page_size=10000&page=0`, {
+            credentials: "same-origin"
+        });
+        if (!artifactsRes.ok) throw new Error("Failed to fetch artifacts.");
+        const artifacts = await artifactsRes.json();
+        const artifactsCEF = artifacts?.data?.map(a => a.cef || {}) || [];
+
+        // extract matching CEF fields
+        const rows = [["CEF_Field", "IOC", "IOC Type"]];
+        artifactsCEF.forEach(cef => {
+            Object.entries(cef).forEach(([cefField, value]) => {
+                if (!fieldMap[cefField]) return;
+
+                const iocType = fieldMap[cefField];
+                const values = Array.isArray(value) ? value : [value];
+
+                values.forEach(v => {
+                    if (v != null && v !== "") {
+                        rows.push([cefField, v.toString().trim(), iocType]);
+                    }
+                });
+            });
+        });
+
+        if (rows.length === 1) {
+            return showError("No matching fields found in artifacts.");
+        }
+
+        // download CSV
+        const csvContent = "data:text/csv;charset=utf-8," +
+            rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+
+        const downloadLink = document.createElement("a");
+        downloadLink.setAttribute("href", encodeURI(csvContent));
+        downloadLink.setAttribute("download", `${containerId}_all_iocs.csv`);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+    } catch (err) {
+        console.error("Export failed:", err);
+        showError("Export failed: " + err.message);
+    }
+}
+
+// Copy table contents as TSV from the currently visible tab
+function copyVisibleTabTable() {
+    const activePanel = document.querySelector('.tab-panel.active');
+    if (!activePanel || !activePanel.id) {
+        alert("No visible table found.");
+        return;
+    }
+
+    const allowedPrefixes = ['tabRelatedEvents', 'tabRelatedCases', 'tabTaskEvents', 'tabEvidenceEvents'];
+    const isAllowed = allowedPrefixes.some(prefix => activePanel.id.startsWith(prefix));
+    if (!isAllowed) {
+        alert("This section does not support copy.");
+        return;
+    }
+
+    const table = activePanel.querySelector('table');
+    if (!table) {
+        alert("No table found in the visible tab.");
+        return;
+    }
+
+    let output = "";
+
+    // Get column headers from first row of thead
+    const headerRow = table.querySelector("thead tr");
+    if (headerRow) {
+        const headers = Array.from(headerRow.querySelectorAll("th")).map(th => th.innerText.trim());
+        output += headers.join("\t") + "\n";
+    }
+
+    // Loop through only visible rows in tbody
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        if (row.offsetParent !== null) {  // visible row
+            const cols = row.querySelectorAll("td");
+            const rowText = Array.from(cols).map(cell =>
+                cell.innerText.replace(/\s+/g, " ").trim()
+            ).join("\t");
+            output += rowText + "\n";
+        }
+    });
+
+    if (!output.trim()) {
+        alert("No visible rows to copy.");
+        return;
+    }
+
+    navigator.clipboard.writeText(output).then(() => {
+        alert("Filtered rows copied to clipboard!");
+    }).catch(err => {
+        console.error("Clipboard copy failed", err);
+        alert("Failed to copy table.");
+    });
+}
+
+// copy table contents as CSV from the currently visible tab
+function copyVisibleTabCSVTable() {
+    const copyBtn = document.getElementById('copyRelatedRecordsBtn');
+    const activePanel = document.querySelector('.tab-panel.active');
+
+    if (!activePanel || !activePanel.id) {
+        showCopyStatus(copyBtn, "❌", "red", "No visible table found.");
+        return;
+    }
+
+    const allowedPrefixes = ['tabRelatedEvents', 'tabRelatedCases', 'tabTaskEvents', 'tabEvidenceEvents'];
+    const isAllowed = allowedPrefixes.some(prefix => activePanel.id.startsWith(prefix));
+
+    if (!isAllowed) {
+        showCopyStatus(copyBtn, "❌", "red", "This section does not support copy.");
+        return;
+    }
+
+    const table = activePanel.querySelector('table');
+    if (!table) {
+        showCopyStatus(copyBtn, "❌", "red", "No table found in the visible tab.");
+        return;
+    }
+
+    let output = "";
+
+    // Extract headers
+    const headerRow = table.querySelector("thead tr");
+    if (headerRow) {
+        const headers = Array.from(headerRow.querySelectorAll("th")).map(th =>
+            `"${th.innerText.replace(/"/g, '""').trim()}"`
+        );
+        output += headers.join(",") + "\n";
+    }
+
+    // Extract visible rows
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        if (row.offsetParent !== null) {
+            const cols = row.querySelectorAll("td");
+            const rowText = Array.from(cols).map(cell => {
+                let text = cell.innerText.replace(/\s+/g, " ").trim();
+                return `"${text.replace(/"/g, '""')}"`;
+            }).join(",");
+            output += rowText + "\n";
+        }
+    });
+
+    if (!output.trim()) {
+        showCopyStatus(copyBtn, "❌", "red", "No visible rows to copy.");
+        return;
+    }
+
+    navigator.clipboard.writeText(output).then(() => {
+        showCopyStatus(copyBtn, "✅", "green", "Copied!");
+    }).catch(err => {
+        console.error("Clipboard copy failed", err);
+        showCopyStatus(copyBtn, "❌", "red", "Clipboard write failed.");
+    });
+}
+
+
+
+// function to copy visible iocs table as csv
+// function copyVisibleIocTableAsCSV() {
+//     const iocTabSection = document.querySelector('#iocTabsSection');
+//     const copyBtn = document.getElementById('copyIOCsCSVBtn');
+
+//     if (!iocTabSection) {
+//         showCopyStatus(copyBtn, "❌", "red", "IOC tab section not found.");
+//         return;
+//     }
+
+//     const activePanel = iocTabSection.querySelector('.tab-panel.active');
+//     if (!activePanel || !activePanel.id) {
+//         showCopyStatus(copyBtn, "❌", "red", "No visible IOC table found.");
+//         return;
+//     }
+
+//     const tabId = activePanel.id;
+//     const allowedKeywords = ['ipTab', 'domainTab', 'urlTab', 'userTab', 'hashTab', 'emailTab', 'macTab'];
+//     const isAllowed = allowedKeywords.some(keyword => tabId.includes(keyword));
+
+//     if (!isAllowed) {
+//         showCopyStatus(copyBtn, "❌", "red", "This section does not support IOC table copy.");
+//         return;
+//     }
+
+//     const table = activePanel.querySelector('table');
+//     if (!table) {
+//         showCopyStatus(copyBtn, "❌", "red", "No table found in the active IOC tab.");
+//         return;
+//     }
+
+//     let output = "";
+
+//     // Headers
+//     const headerRow = table.querySelector("thead tr");
+//     if (headerRow) {
+//         const headers = Array.from(headerRow.querySelectorAll("th")).map(th =>
+//             `"${th.innerText.replace(/"/g, '""').trim()}"`
+//         );
+//         output += headers.join(",") + "\n";
+//     }
+
+//     // Visible rows
+//     const rows = table.querySelectorAll("tbody tr");
+//     rows.forEach(row => {
+//         if (row.offsetParent !== null) {
+//             const cols = row.querySelectorAll("td");
+//             const rowText = Array.from(cols).map((cell, index) => {
+//                 const link = cell.querySelector('a');
+
+//                 // ✅ If it's the "Indicator" column with a URL, extract the href
+//                 if (link && link.href && link.innerText.includes("Indicator")) {
+//                     return `"${link.href.replace(/"/g, '""')}"`;
+//                 }
+
+//                 // ❌ If there's a button inside (like 📋), exclude it from the text
+//                 const button = cell.querySelector('button');
+//                 if (button) {
+//                     button.remove(); // temporarily remove button to clean innerText
+//                 }
+
+//                 // Clean up text content
+//                 const text = cell.innerText.replace(/\s+/g, " ").replace(/"/g, '""').trim();
+
+//                 if (button) {
+//                     cell.appendChild(button); // reattach button to preserve DOM
+//                 }
+
+//                 return `"${text}"`;
+//             }).join(",");
+//             output += rowText + "\n";
+//         }
+//     });
+
+//     if (!output.trim()) {
+//         showCopyStatus(copyBtn, "❌", "red", "No visible rows to copy.");
+//         return;
+//     }
+
+//     navigator.clipboard.writeText(output).then(() => {
+//         showCopyStatus(copyBtn, "✅", "green", "Copied!");
+//     }).catch(err => {
+//         console.error("Clipboard copy failed", err);
+//         showCopyStatus(copyBtn, "❌", "red", "Clipboard write failed.");
+//     });
+// }
+
+function copyVisibleIocTableAsCSV() {
+    const iocTabSection = document.querySelector('#iocTabsSection');
+    const copyBtn = document.getElementById('copyIOCsCSVBtn');
+
+    if (!iocTabSection) {
+        showCopyStatus(copyBtn, "❌", "red", "IOC tab section not found.");
+        return;
+    }
+
+    const activePanel = iocTabSection.querySelector('.tab-panel.active');
+    if (!activePanel || !activePanel.id) {
+        showCopyStatus(copyBtn, "❌", "red", "No visible IOC table found.");
+        return;
+    }
+
+    const tabId = activePanel.id;
+    const allowedKeywords = ['ipTab', 'domainTab', 'urlTab', 'userTab', 'hashTab', 'emailTab', 'macTab'];
+    const isAllowed = allowedKeywords.some(keyword => tabId.includes(keyword));
+
+    if (!isAllowed) {
+        showCopyStatus(copyBtn, "❌", "red", "This section does not support IOC table copy.");
+        return;
+    }
+
+    const table = activePanel.querySelector('table');
+    if (!table) {
+        showCopyStatus(copyBtn, "❌", "red", "No table found in the active IOC tab.");
+        return;
+    }
+
+    let output = "";
+
+    // Headers
+    const headerRow = table.querySelector("thead tr");
+    if (headerRow) {
+        const headers = Array.from(headerRow.querySelectorAll("th")).map(th =>
+            `"${th.innerText.replace(/"/g, '""').trim()}"`
+        );
+        output += headers.join(",") + "\n";
+    }
+
+    // Visible rows
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        if (row.offsetParent !== null) {
+            const cols = row.querySelectorAll("td");
+            const rowText = Array.from(cols).map((cell, index) => {
+                // ✅ If this is the last column (Indicator)
+                if (index === cols.length - 1) {
+                    const link = cell.querySelector('a');
+                    if (link && link.href) {
+                        return `"${link.href.replace(/"/g, '""')}"`;
+                    } else {
+                        return `""`;
+                    }
+                }
+
+                // Remove clipboard button from cell before getting text
+                const copyBtn = cell.querySelector('button.copy-btn');
+                if (copyBtn) {
+                    copyBtn.remove();
+                }
+
+                const text = cell.innerText.replace(/\s+/g, " ").replace(/"/g, '""').trim();
+
+                if (copyBtn) {
+                    cell.appendChild(copyBtn); // reattach if needed
+                }
+
+                return `"${text}"`;
+            }).join(",");
+            output += rowText + "\n";
+        }
+    });
+
+    if (!output.trim()) {
+        showCopyStatus(copyBtn, "❌", "red", "No visible rows to copy.");
+        return;
+    }
+
+    navigator.clipboard.writeText(output).then(() => {
+        showCopyStatus(copyBtn, "✅", "green", "Copied!");
+    }).catch(err => {
+        console.error("Clipboard copy failed", err);
+        showCopyStatus(copyBtn, "❌", "red", "Clipboard write failed.");
+    });
+}
+
+
+// Copy status helper function
+function showCopyStatus(buttonEl, symbol, color, message) {
+    const originalHTML = buttonEl.innerHTML;
+    buttonEl.innerHTML = `${symbol} ${message}`;
+    buttonEl.style.color = color;
+
+    setTimeout(() => {
+        buttonEl.innerHTML = originalHTML;
+        buttonEl.style.color = '';
+    }, 2000);
+}
+
+</script>
+
+<!-- Container to hold main ES finding information -->
+<div class="container">
+    {% for result in results %}
+        <!-- Refresh Findings Button -->    
+        {% if result.data.container_stats.container_id %}
+            <h2>Findings Summary - Container ID: {{ result.data.container_stats.container_id }}</h2>
+            <button id="refreshFindingsBtn" class="btn-warning" onclick="refreshFindings(this, '{{ result.data.container_stats.container_id }}', 15, true)">
+                🔁 Refresh Findings ({{ result.data.container_stats.container_id }})
+            </button>
+        {% endif %}
+
+        <!-- Findings Name -->   
+        <div class="row">
+        {% if result.data.finding_information.finding_name %}
+        <div class="col">
+            <div class="p-3">
+                <h5>Finding Title</h5>
+                <h6>{{ result.data.finding_information.finding_name }}</h6>
+            </div>
+        </div>
+        {% else %}
+        <div class="col">
+            <div class="p-3">
+                <h5>Finding Title</h5>
+                <p class="text-muted">No title information available.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Findings Description -->   
+        {% if result.data.finding_information.finding_description %}
+        <div class="col">
+            <div class="p-3">
+                <h5>Finding Description</h5>
+                <h6>{{ result.data.finding_information.finding_description }}</h6>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ES Drilldown Button -->
+        {% if result.data.finding_information.finding_contributing_events or result.data.finding_information.drilldown_search %}
+        <div class="col">
+            <div class="p-3">
+                <h5>ES Contributing Events</h5>
+                <h6>
+                    <a class="btn-primary" role="button" 
+                       href="{{ result.data.finding_information.finding_contributing_events|default:'' }}{{ result.data.finding_information.drilldown_search|urlencode|default:'' }}" 
+                       target="_blank">
+                        ES Drilldown
+                    </a>
+                </h6>
+            </div>
+        </div>
+        {% else %}
+        <div class="col">
+            <div class="p-3">
+                <h5>ES Contributing Events</h5>
+                <p class="text-muted">No drilldown information available.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- MITRE ATT&CK Techniques -->
+{% for result in results %}
+{% if result.data.finding_information.finding_mitre_techniques %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="p-2">
+                <h5>MITRE ATT&CK Techniques</h5>
+                {% for technique in result.data.finding_information.finding_mitre_techniques %}
+                <a href="#" class="btn btn-outline-warning">{{ technique }}</a>
+                {% endfor %}
+            </div>
+        </div>
+{% endif %}
+
+<!-- Reporting Device -->   
+{% if result.data.finding_information.finding_dvc %}
+        <div class="col">
+            <div class="p-2">
+                <h5>Reporting Device</h5>
+                <h6>{{ result.data.finding_information.finding_dvc }}</h6>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+
+<!-- START - NEW TABBED - Main Section for Related Records -->   
+
+<div class="container">
+{% for result in results %}    
+    {% if result.data.related_events or result.data.related_cases or result.data.task_events_list or result.data.evidence_events %}
+    <hr>
+    {% if result.data.related_record_count %}
+        <h2>Related Records</h2>
+        <button id="copyRelatedRecordsBtn" class="btn-primary" onclick="copyVisibleTabCSVTable()">📋 Copy Records</button>
+    	<h5>Total Records - {{ result.data.related_record_count }}</h5>
+    {% endif %}
+    <div class="tab-container">
+        <ul class="tab-nav">
+            {% if result.data.related_events %}
+            <li class="tab-link active" data-tab="tabRelatedEvents{{ forloop.counter }}">Related Events <span class="badge">{{ result.data.related_events|length }}</span></li>
+            {% endif %}
+            {% if result.data.related_cases %}
+            <li class="tab-link{% if not result.data.related_events %} active{% endif %}" data-tab="tabRelatedCases{{ forloop.counter }}">Related Cases <span class="badge">{{ result.data.related_cases|length }}</span></li>
+            {% endif %}
+            {% if result.data.task_events_list %}
+            <li class="tab-link{% if not result.data.related_events and not result.data.related_cases %} active{% endif %}" data-tab="tabTaskEvents{{ forloop.counter }}">Task Events <span class="badge">{{ result.data.task_events_list|length }}</span></li>
+            {% endif %}
+            {% if result.data.evidence_events %}
+            <li class="tab-link{% if not result.data.related_events and not result.data.related_cases and not result.data.task_events_list %} active{% endif %}" data-tab="tabEvidenceEvents{{ forloop.counter }}">Associated Events <span class="badge">{{ result.data.evidence_events|length }}</span></li>
+            {% endif %}
+        </ul>
+
+        {% if result.data.related_events %}
+        <div class="tab-panel active" id="tabRelatedEvents{{ forloop.counter }}">
+            <table class="table" id="relatedEventsTable{{ forloop.counter }}">
+                <thead>
+                    <tr>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 0)">
+                            Related Event/Case Name
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 1)">
+                            Type
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 2)">
+                            ID
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 3)">
+                            Label
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 4)">
+                            Owner
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 5)">
+                            Status
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 6)">
+                            Update Time
+                        </th>
+                        <th onclick="sortTableByColumn('relatedEventsTable{{ forloop.counter }}', 7)">
+                            Tags
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Event/Case Name..."
+                                id="relatedNameSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Type..."
+                                id="relatedTypeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search ID..."
+                                id="relatedIdSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Label..."
+                                id="relatedLabelSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Owner..."
+                                id="relatedOwnerSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Status..."
+                                id="relatedStatusSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Update Time..."
+                                id="relatedUpdateTimeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Tags..."
+                                id="relatedTagsSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'relatedNameSearch{{ forloop.counter }}', 
+                                    'relatedTypeSearch{{ forloop.counter }}', 
+                                    'relatedIdSearch{{ forloop.counter }}', 
+                                    'relatedLabelSearch{{ forloop.counter }}', 
+                                    'relatedOwnerSearch{{ forloop.counter }}',
+                                    'relatedStatusSearch{{ forloop.counter }}', 
+                                    'relatedUpdateTimeSearch{{ forloop.counter }}', 
+                                    'relatedTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedEventsTable{{ forloop.counter }}')">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in result.data.related_events %}
+                    <tr>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_name }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_type }}
+                        </td>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_id }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ data.baseurl }}/browse?label={{ event.event_label }}" target="_blank">{{ event.event_label }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_owner }}
+                        </td>
+                        <td>
+                            {{ event.event_status }}
+                        </td>
+                        <td>
+                            {{ event.event_update_time }}
+                        </td>
+                        <!-- <td>{{ event.event_tags|join:", " }}</td> -->
+                        <td>
+                            {% for tag in event.event_tags %}
+                                <a href="{{ data.baseurl }}/browse?tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if result.data.related_cases %}
+        <div class="tab-panel{% if not result.data.related_events %} active{% endif %}" id="tabRelatedCases{{ forloop.counter }}">
+            <table class="table" id="relatedCasesTable{{ forloop.counter }}">
+                <thead>
+                    <tr>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 0)">
+                            Related Case Name
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 1)">
+                            Type
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 2)">
+                            ID
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 3)">
+                            Label
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 4)">
+                            Owner
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 5)">
+                            Status
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 6)">
+                            Update Time
+                        </th>
+                        <th onclick="sortTableByColumn('relatedCasesTable{{ forloop.counter }}', 7)">
+                            Tags
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Case Name..."
+                                id="caseNameSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Type..."
+                                id="caseTypeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search ID..."
+                                id="caseIdSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Label..."
+                                id="caseLabelSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Owner..."
+                                id="caseOwnerSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Status..."
+                                id="caseStatusSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Update Time..."
+                                id="caseUpdateTimeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Tags..."
+                                id="caseTagsSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'caseNameSearch{{ forloop.counter }}', 
+                                    'caseTypeSearch{{ forloop.counter }}', 
+                                    'caseIdSearch{{ forloop.counter }}', 
+                                    'caseLabelSearch{{ forloop.counter }}', 
+                                    'caseOwnerSearch{{ forloop.counter }}',
+                                    'caseStatusSearch{{ forloop.counter }}', 
+                                    'caseUpdateTimeSearch{{ forloop.counter }}', 
+                                    'caseTagsSearch{{ forloop.counter }}'
+                                    ], 'relatedCasesTable{{ forloop.counter }}')">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in result.data.related_cases %}
+                    <tr>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_name }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_type }}
+                        </td>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_id }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ data.baseurl }}/cases?label={{ event.event_label }}" target="_blank">{{ event.event_label }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_owner }}
+                        </td>
+                        <td>
+                            {{ event.event_status }}
+                        </td>
+                        <td>
+                            {{ event.event_update_time }}
+                        </td>
+                        <!-- <td>{{ event.event_tags|join:", " }}</td> -->
+                        <td>
+                            {% for tag in event.event_tags %}
+                                <a href="{{ data.baseurl }}/cases?tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if result.data.task_events_list %}
+        <div class="tab-panel{% if not result.data.related_events and not result.data.related_cases %} active{% endif %}" id="tabTaskEvents{{ forloop.counter }}">
+            <table class="table" id="taskEventsTable{{ forloop.counter }}">
+                <thead>
+                    <tr>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 0)">
+                            Task Event Name
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 1)">
+                            Type
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 2)">
+                            ID
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 3)">
+                            Label
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 4)">
+                            Owner
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 5)">
+                            Status
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 6)">
+                            Update Time
+                        </th>
+                        <th onclick="sortTableByColumn('taskEventsTable{{ forloop.counter }}', 7)">
+                            Tags
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Task Name..."
+                                id="taskNameSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}', 
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Type..."
+                                id="taskTypeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search ID..."
+                                id="taskIdSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Label..."
+                                id="taskLabelSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Owner..."
+                                id="taskOwnerSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Status..."
+                                id="taskStatusSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Update Time..."
+                                id="taskUpdateTimeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'
+                                    ], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Tags..."
+                                id="taskTagsSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'taskNameSearch{{ forloop.counter }}', 
+                                    'taskTypeSearch{{ forloop.counter }}',
+                                    'taskIdSearch{{ forloop.counter }}', 
+                                    'taskLabelSearch{{ forloop.counter }}', 
+                                    'taskOwnerSearch{{ forloop.counter }}',
+                                    'taskStatusSearch{{ forloop.counter }}', 
+                                    'taskUpdateTimeSearch{{ forloop.counter }}', 
+                                    'taskTagsSearch{{ forloop.counter }}'], 'taskEventsTable{{ forloop.counter }}')">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in result.data.task_events_list %}
+                    <tr>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_name }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_type }}
+                        </td>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_id }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ data.baseurl }}/browse?label={{ event.event_label }}" target="_blank">{{ event.event_label }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_owner }}
+                        </td>
+                        <td>
+                            {{ event.event_status }}
+                        </td>
+                        <td>
+                            {{ event.event_update_time }}
+                        </td>
+                        <!-- <td>{{ event.event_tags|join:", " }}</td> -->
+                        <td>
+                            {% for tag in event.event_tags %}
+                                <a href="{{ data.baseurl }}/browse?tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if result.data.evidence_events %}
+        <div class="tab-panel{% if not result.data.related_events and not result.data.related_cases and not result.data.task_events_list %} active{% endif %}" id="tabEvidenceEvents{{ forloop.counter }}">
+            <table class="table" id="evidenceEventsTable{{ forloop.counter }}">
+                <thead>
+                    <tr>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 0)">
+                            Evidence Event Name
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 1)">
+                            Type
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 2)">
+                            ID
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 3)">
+                            Label
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 4)">
+                            Owner
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 5)">
+                            Status
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 6)">
+                            Update Time
+                        </th>
+                        <th onclick="sortTableByColumn('evidenceEventsTable{{ forloop.counter }}', 7)">
+                            Tags
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Evidence Name..."
+                                id="evidenceNameSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Type..."
+                                id="evidenceTypeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search ID..."
+                                id="evidenceIdSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Label..."
+                                id="evidenceLabelSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Owner..."
+                                id="evidenceOwnerSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Status..."
+                                id="evidenceStatusSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Update Time..."
+                                id="evidenceUpdateTimeSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                        <th>
+                            <input type="text" class="search-input" placeholder="Search Tags..."
+                                id="evidenceTagsSearch{{ forloop.counter }}"
+                                onkeyup="filterTable([
+                                    'evidenceNameSearch{{ forloop.counter }}', 
+                                    'evidenceTypeSearch{{ forloop.counter }}', 
+                                    'evidenceIdSearch{{ forloop.counter }}', 
+                                    'evidenceLabelSearch{{ forloop.counter }}', 
+                                    'evidenceOwnerSearch{{ forloop.counter }}', 
+                                    'evidenceStatusSearch{{ forloop.counter }}', 
+                                    'evidenceUpdateTimeSearch{{ forloop.counter }}', 
+                                    'evidenceTagsSearch{{ forloop.counter }}'
+                                    ], 'evidenceEventsTable{{ forloop.counter }}')">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in result.data.evidence_events %}
+                    <tr>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_name }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_type }}
+                        </td>
+                        <td>
+                            <a href="{{ event.url }}" target="_blank">{{ event.event_id }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ data.baseurl }}/browse?label={{ event.event_label }}" target="_blank">{{ event.event_label }}</a>
+                        </td>
+                        <td>
+                            {{ event.event_owner }}
+                        </td>
+                        <td>
+                            {{ event.event_status }}
+                        </td>
+                        <td>
+                            {{ event.event_update_time }}
+                        </td>
+                        <!-- <td>{{ event.event_tags|join:", " }}</td> -->
+                        <td>
+                            {% for tag in event.event_tags %}
+                                <a href="{{ data.baseurl }}/browse?tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endfor %}
+</div>
+
+<!-- END - NEW TABBED - Main Section for Related Records -->   
+
+
+<!-- Artifacts Information -->
+<div class="container">
+    {% for result in results %}
+    <div id="iocTabsSection">
+        {% if result.data.container_stats.number_of_artifacts or result.data.container_stats.unique_ioc_count %}
+        <hr>
+        <h2>Artifacts Information</h2>
+            <button id="exportIOCFieldsBtn" class="btn-primary" onclick="exportIOCFields('{{ result.data.container_stats.container_id }}')">
+            📄 Export Artifact IOCs
+            </button>
+            <button id="downloadIOCsCSVBtn" class="btn-primary" onclick="downloadIOCsCSV()">
+                🔥 Download Unique IOCs (CSV)
+            </button>
+            <button id="copyIOCsCSVBtn" class="btn-primary" onclick="copyVisibleIocTableAsCSV()">
+            	📋 Copy IOCs
+        	</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;" class="artifacts-container">
+            {% if result.data.container_stats.number_of_artifacts %}
+                <h5 class="artifacts-heading">Total Artifacts - {{ result.data.container_stats.number_of_artifacts }}</h5>
+            {% endif %}
+            {% if result.data.container_stats.unique_ioc_count %}
+                <h5 class="artifacts-heading">Unique IOCs - {{ result.data.container_stats.unique_ioc_count }}</h5>
+            {% endif %}
+        </div>
+        {% endif %}
+
+
+        <div class="tab-container">
+            <ul class="tab-nav">
+                {% if result.data.finding_information.ip_address_list %}
+                    <li class="tab-link active" data-tab="ipTab{{ forloop.counter }}">IP Addresses <span class="badge">{{ result.data.finding_information.ip_address_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.domain_list %}
+                    <li class="tab-link" data-tab="domainTab{{ forloop.counter }}">Domains <span class="badge">{{ result.data.finding_information.domain_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.url_list %}
+                    <li class="tab-link" data-tab="urlTab{{ forloop.counter }}">URLs <span class="badge">{{ result.data.finding_information.url_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.user_list %}
+                    <li class="tab-link" data-tab="userTab{{ forloop.counter }}">Users <span class="badge">{{ result.data.finding_information.user_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.hash_list %}
+                    <li class="tab-link" data-tab="hashTab{{ forloop.counter }}">Hashes <span class="badge">{{ result.data.finding_information.hash_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.email_list %}
+                    <li class="tab-link" data-tab="emailTab{{ forloop.counter }}">Emails <span class="badge">{{ result.data.finding_information.email_list|length }}</span></li>
+                {% endif %}
+                {% if result.data.finding_information.mac_list %}
+                    <li class="tab-link" data-tab="macTab{{ forloop.counter }}">MAC Addresses <span class="badge">{{ result.data.finding_information.mac_list|length }}</span></li>
+                {% endif %}
+            </ul>
+
+            <!-- IP Addresses -->
+            {% if result.data.finding_information.ip_address_list %}
+                <div class="tab-panel active" id="ipTab{{ forloop.counter }}">
+                    <table class="table" id="ipTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 0)">IP Address</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('ipTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search IP..." id="ipSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="ipSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}',
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="ipSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="ipSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="ipSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="ipSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="ipSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'ipSearchIoc{{ forloop.counter }}',
+                                            'ipSearchFirstSeen{{ forloop.counter }}',
+                                            'ipSearchLastSeen{{ forloop.counter }}',
+                                            'ipSearchOpenEvents{{ forloop.counter }}',
+                                            'ipSearchTotalEvents{{ forloop.counter }}',
+                                            'ipSearchCases{{ forloop.counter }}',
+                                            'ipSearchTags{{ forloop.counter }}'
+                                        ], 'ipTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ip_obj in result.data.finding_information.ip_address_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ ip_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        {{ ip_obj.ioc }}
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ ip_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ ip_obj.first_seen }}</td>
+                                <td>{{ ip_obj.last_seen }}</td>
+                                <td>{{ ip_obj.open_events }}</td>
+                                <td>{{ ip_obj.total_events }}</td>
+                                <td>
+                                    {% for case in ip_obj.indicator_cases %}
+                                        <a href="{{ ip_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ ip_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in ip_obj.tags %}
+                                        <a href="{{ ip_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with ip_url=ip_obj.url|default_if_none:"" %}
+                                        {% if ip_url %}
+                                            <a class="btn-primary" role="button" href="{{ ip_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+
+            <!-- Domains -->
+            {% if result.data.finding_information.domain_list %}
+                <div class="tab-panel" id="domainTab{{ forloop.counter }}">
+                    <table class="table" id="domainTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 0)">Domain</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('domainTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Domain..." id="domainSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="domainSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="domainSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="domainSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="domainSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="domainSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="domainSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'domainSearchIoc{{ forloop.counter }}',
+                                            'domainSearchFirstSeen{{ forloop.counter }}',
+                                            'domainSearchLastSeen{{ forloop.counter }}',
+                                            'domainSearchOpenEvents{{ forloop.counter }}',
+                                            'domainSearchTotalEvents{{ forloop.counter }}',
+                                            'domainSearchCases{{ forloop.counter }}',
+                                            'domainSearchTags{{ forloop.counter }}'
+                                        ], 'domainTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for domain_obj in result.data.finding_information.domain_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['domain'], 'value': '{{ domain_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        {{ domain_obj.ioc }}
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ domain_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ domain_obj.first_seen }}</td>
+                                <td>{{ domain_obj.last_seen }}</td>
+                                <td>{{ domain_obj.open_events }}</td>
+                                <td>{{ domain_obj.total_events }}</td>
+                                <td>
+                                    {% for case in domain_obj.indicator_cases %}
+                                        <a href="{{ domain_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ domain_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in domain_obj.tags %}
+                                        <a href="{{ domain_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with domain_url=domain_obj.url|default_if_none:"" %}
+                                        {% if domain_url %}
+                                            <a class="btn-primary" role="button" href="{{ domain_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+
+            <!-- URLs Section -->
+            {% if result.data.finding_information.url_list %}
+                <div class="tab-panel" id="urlTab{{ forloop.counter }}">
+                    <table class="table" id="urlTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 0)">URL</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('urlTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search URL..." id="urlSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="urlSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="urlSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="urlSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="urlSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="urlSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="urlSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'urlSearchIoc{{ forloop.counter }}',
+                                            'urlSearchFirstSeen{{ forloop.counter }}',
+                                            'urlSearchLastSeen{{ forloop.counter }}',
+                                            'urlSearchOpenEvents{{ forloop.counter }}',
+                                            'urlSearchTotalEvents{{ forloop.counter }}',
+                                            'urlSearchCases{{ forloop.counter }}',
+                                            'urlSearchTags{{ forloop.counter }}'
+                                        ], 'urlTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for url_obj in result.data.finding_information.url_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ url_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        <!-- {{ url_obj.ioc }} ▼ -->
+                                        <span class="ioc-text" data-full-ioc="{{ url_obj.ioc|escapejs }}"></span>
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ url_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ url_obj.first_seen }}</td>
+                                <td>{{ url_obj.last_seen }}</td>
+                                <td>{{ url_obj.open_events }}</td>
+                                <td>{{ url_obj.total_events }}</td>
+                                <td>
+                                    {% for case in url_obj.indicator_cases %}
+                                        <a href="{{ url_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ url_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in url_obj.tags %}
+                                        <a href="{{ url_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with url_value=url_obj.url|default_if_none:"" %}
+                                        {% if url_value %}
+                                            <a class="btn-primary" role="button" href="{{ url_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            <!-- Users Section -->
+            {% if result.data.finding_information.user_list %}
+                <div class="tab-panel" id="userTab{{ forloop.counter }}">
+                    <table class="table" id="userTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 0)">User</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('userTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search User..." id="userSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="userSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="userSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="userSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="userSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="userSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="userSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'userSearchIoc{{ forloop.counter }}',
+                                            'userSearchFirstSeen{{ forloop.counter }}',
+                                            'userSearchLastSeen{{ forloop.counter }}',
+                                            'userSearchOpenEvents{{ forloop.counter }}',
+                                            'userSearchTotalEvents{{ forloop.counter }}',
+                                            'userSearchCases{{ forloop.counter }}',
+                                            'userSearchTags{{ forloop.counter }}'
+                                        ], 'userTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_obj in result.data.finding_information.user_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['user'], 'value': '{{ user_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        {{ user_obj.ioc }}
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ user_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ user_obj.first_seen }}</td>
+                                <td>{{ user_obj.last_seen }}</td>
+                                <td>{{ user_obj.open_events }}</td>
+                                <td>{{ user_obj.total_events }}</td>
+                                <td>
+                                    {% for case in user_obj.indicator_cases %}
+                                        <a href="{{ user_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ user_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in user_obj.tags %}
+                                        <a href="{{ user_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with user_url=user_obj.url|default_if_none:"" %}
+                                        {% if user_url %}
+                                            <a class="btn-primary" role="button" href="{{ user_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+
+            <!-- Hashes Section -->
+            {% if result.data.finding_information.hash_list %}
+                <div class="tab-panel" id="hashTab{{ forloop.counter }}">
+                    <table class="table" id="hashTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 0)">Hash</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('hashTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Hash..." id="hashSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="hashSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="hashSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="hashSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="hashSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="hashSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="hashSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'hashSearchIoc{{ forloop.counter }}',
+                                            'hashSearchFirstSeen{{ forloop.counter }}',
+                                            'hashSearchLastSeen{{ forloop.counter }}',
+                                            'hashSearchOpenEvents{{ forloop.counter }}',
+                                            'hashSearchTotalEvents{{ forloop.counter }}',
+                                            'hashSearchCases{{ forloop.counter }}',
+                                            'hashSearchTags{{ forloop.counter }}'
+                                        ], 'hashTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hash_obj in result.data.finding_information.hash_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['hash'], 'value': '{{ hash_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        <!-- {{ hash_obj.ioc }} -->
+                                        <span class="ioc-text" data-full-ioc="{{ hash_obj.ioc|escapejs }}"></span>
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ hash_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ hash_obj.first_seen }}</td>
+                                <td>{{ hash_obj.last_seen }}</td>
+                                <td>{{ hash_obj.open_events }}</td>
+                                <td>{{ hash_obj.total_events }}</td>
+                                <td>
+                                    {% for case in hash_obj.indicator_cases %}
+                                        <a href="{{ hash_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ hash_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in hash_obj.tags %}
+                                        <a href="{{ hash_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with hash_url=hash_obj.url|default_if_none:"" %}
+                                        {% if hash_url %}
+                                            <a class="btn-primary" role="button" href="{{ hash_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+
+            <!-- Email Address Section -->
+            {% if result.data.finding_information.email_list %}
+                <div class="tab-panel" id="emailTab{{ forloop.counter }}">
+                    <table class="table" id="emailTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 0)">Email</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('emailTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Email..." id="emailSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="emailSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="emailSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="emailSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="emailSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="emailSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="emailSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'emailSearchIoc{{ forloop.counter }}',
+                                            'emailSearchFirstSeen{{ forloop.counter }}',
+                                            'emailSearchLastSeen{{ forloop.counter }}',
+                                            'emailSearchOpenEvents{{ forloop.counter }}',
+                                            'emailSearchTotalEvents{{ forloop.counter }}',
+                                            'emailSearchCases{{ forloop.counter }}',
+                                            'emailSearchTags{{ forloop.counter }}'
+                                        ], 'emailTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for email_obj in result.data.finding_information.email_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['email'], 'value': '{{ email_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        {{ email_obj.ioc }}
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ email_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ email_obj.first_seen }}</td>
+                                <td>{{ email_obj.last_seen }}</td>
+                                <td>{{ email_obj.open_events }}</td>
+                                <td>{{ email_obj.total_events }}</td>
+                                <td>
+                                    {% for case in email_obj.indicator_cases %}
+                                        <a href="{{ email_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ email_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in email_obj.tags %}
+                                        <a href="{{ email_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with email_url=email_obj.url|default_if_none:"" %}
+                                        {% if email_url %}
+                                            <a class="btn-primary" role="button" href="{{ email_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+
+            <!-- MAC Address Section -->
+            {% if result.data.finding_information.mac_list %}
+                <div class="tab-panel" id="macTab{{ forloop.counter }}">
+                    <table class="table" id="macTable{{ forloop.counter }}">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 0)">MAC Address</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 1)">First Seen</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 2)">Last Seen</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 3)">Open Events</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 4)">Total Events</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 5)">Cases</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 6)">Tags</th>
+                                <th onclick="sortTableByColumn('macTable{{ forloop.counter }}', 7)">Indicator</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search MAC..." id="macSearchIoc{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search First Seen..." id="macSearchFirstSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Last Seen..." id="macSearchLastSeen{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Open Events..." id="macSearchOpenEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Total Events..." id="macSearchTotalEvents{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Cases..." id="macSearchCases{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                                <th>
+                                    <input type="text" class="search-input" placeholder="Search Tags..." id="macSearchTags{{ forloop.counter }}"
+                                        onkeyup="filterTable([
+                                            'macSearchIoc{{ forloop.counter }}',
+                                            'macSearchFirstSeen{{ forloop.counter }}',
+                                            'macSearchLastSeen{{ forloop.counter }}',
+                                            'macSearchOpenEvents{{ forloop.counter }}',
+                                            'macSearchTotalEvents{{ forloop.counter }}',
+                                            'macSearchCases{{ forloop.counter }}',
+                                            'macSearchTags{{ forloop.counter }}'
+                                        ], 'macTable{{ forloop.counter }}')">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mac_obj in result.data.finding_information.mac_list %}
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="context_menu(this, [{'contains': ['mac'], 'value': '{{ mac_obj.ioc|escapejs }}' }], 0, {{ result.data.finding_information.container_id }}, null, false); return false;">
+                                        {{ mac_obj.ioc }}
+                                        <button class="copy-btn" type="button" onclick="copyToClipboard(event, '{{ mac_obj.ioc|escapejs }}')" title="Copy to clipboard">📋</button>
+                                    </a>
+                                </td>
+                                <td>{{ mac_obj.first_seen }}</td>
+                                <td>{{ mac_obj.last_seen }}</td>
+                                <td>{{ mac_obj.open_events }}</td>
+                                <td>{{ mac_obj.total_events }}</td>
+                                <td>
+                                    {% for case in mac_obj.indicator_cases %}
+                                        <a href="{{ mac_obj.baseurl }}/mission/{{ case }}/analyst" target="_blank">{{ case }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <!-- <td>{{ mac_obj.tags|join:", " }}</td> -->
+                                <td>
+                                    {% for tag in mac_obj.tags %}
+                                        <a href="{{ mac_obj.baseurl }}/indicators/?sort=id&order=desc&timerange=this_year&per_page=10&page=1&tags={{ tag }}" target="_blank">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% with mac_url=mac_obj.url|default_if_none:"" %}
+                                        {% if mac_url %}
+                                            <a class="btn-primary" role="button" href="{{ mac_obj.url }}" target="_blank">Indicator</a>
+                                        {% else %}
+                                            <span class="btn-secondary">Indicator</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Raw Data Section -->
+{% if results and results.0.data.finding_information.finding_raw %}
+<hr>
+<div class="container">
+    <div>
+        <div>
+            <button class="accordion-btn" onclick="toggleAccordion('rawContent', this)">
+                Raw Data <span class="indicator">▶</span>
+            </button>
+            <div id="rawContent" class="accordion-content">
+                <div class="card">
+                    <div class="card-body">
+                        <code>{{ results.0.data.finding_information.finding_raw }}</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<!-- ... Code for Artifact tabs... -->
+<script>
+function initTabs(container) {
+    // console.log('Initializing tabs for container:', container);
+    const nav = container.querySelector('.tab-nav');
+    if (!nav) {
+        console.warn('No .tab-nav found in container');
+        return;
+    }
+
+    // Get all tab links and panels
+    const tabs = nav.querySelectorAll('.tab-link');
+    const panels = container.querySelectorAll('.tab-panel');
+    // console.log(`Found ${tabs.length} tabs and ${panels.length} panels`);
+
+    // Ensure only one tab is active initially
+    let hasActive = false;
+    tabs.forEach((tab, index) => {
+        if (tab.classList.contains('active')) {
+            if (hasActive) {
+                tab.classList.remove('active');
+            } else {
+                hasActive = true;
+            }
+        }
+    });
+
+    // If no tab is active, activate the first one
+    if (!hasActive && tabs.length > 0) {
+        tabs[0].classList.add('active');
+        const firstPanelId = tabs[0].getAttribute('data-tab');
+        const firstPanel = container.querySelector(`#${firstPanelId}`);
+        if (firstPanel) firstPanel.classList.add('active');
+    }
+
+    // Add click handlers
+    nav.addEventListener('click', function(e) {
+        const tab = e.target.closest('.tab-link');
+        if (!tab) return;
+
+        // console.log('Tab clicked:', tab.textContent);
+        const tabId = tab.getAttribute('data-tab');
+        if (!tabId) {
+            console.warn('No data-tab attribute found on tab:', tab);
+            return;
+        }
+
+        // Remove active class from all tabs and panels
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        // Add active class to clicked tab and its panel
+        tab.classList.add('active');
+        const panel = container.querySelector(`#${tabId}`);
+        if (panel) {
+            panel.classList.add('active');
+        } else {
+            console.warn(`No panel found with id: ${tabId}`);
+        }
+    });
+}
+
+// url truncation function
+function truncateIOC(ioc, maxLength = 60) {
+    if (!ioc || ioc.length <= maxLength) return ioc;
+    return ioc.slice(0, maxLength - 3) + '...';
+}
+
+function truncateIOCElements() {
+    document.querySelectorAll('.ioc-text').forEach(el => {
+        const fullIoc = el.getAttribute('data-full-ioc');
+        if (fullIoc) {
+            el.textContent = truncateIOC(fullIoc);
+        }
+    });
+}
+
+
+// experimental function for copying the ioc on click
+function copyToClipboard(event, text) {
+    event.preventDefault();   // Prevent scroll-to-top or form submit
+    event.stopPropagation();  // Prevent triggering other click handlers
+
+    const btn = event.currentTarget;
+
+    if (!navigator.clipboard) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            if (btn) {
+                const original = btn.textContent;
+                btn.textContent = '✅';
+                setTimeout(() => btn.textContent = original, 1000);
+            }
+        } catch (err) {
+            console.warn('Fallback: Copy failed', err);
+        }
+        document.body.removeChild(textarea);
+    } else {
+        navigator.clipboard.writeText(text).then(() => {
+            if (btn) {
+                const original = btn.textContent;
+                btn.textContent = '✅';
+                setTimeout(() => btn.textContent = original, 1000);
+            }
+        }).catch(err => {
+            console.warn('Clipboard copy failed', err);
+        });
+    }
+}
+
+function setupTabs() {
+    // console.log('Setting up tabs');
+    const containers = document.querySelectorAll('.tab-container');
+    // console.log(`Found ${containers.length} tab containers`);
+    containers.forEach(initTabs);
+    // run truncate on DOM ready - this is for url truncation
+    truncateIOCElements();
+}
+
+// Initialize tabs when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTabs);
+} else {
+    setupTabs();
+}
+
+</script>
+
+{% endblock %}
